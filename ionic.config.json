@@ -1,0 +1,8 @@
+{
+  "name": "FFNoctuleRoom",
+  "integrations": {
+    "capacitor": {},
+    "cordova": {}
+  },
+  "type": "custom"
+}
