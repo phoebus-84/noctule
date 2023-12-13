@@ -7,9 +7,12 @@ import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
 
+import com.arthenica.ffmpegkit.FFmpegKitConfig;
 import com.arthenica.ffmpegkit.FFmpegSession;
-//import com.arthenica.ffmpegkit.FFmpegConfig;
 import com.arthenica.ffmpegkit.ReturnCode;
+import com.arthenica.ffmpegkit.Session;
+import com.arthenica.ffmpegkit.Statistics;
+import com.arthenica.ffmpegkit.StatisticsCallback;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
@@ -18,6 +21,7 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 import com.arthenica.ffmpegkit.FFmpegKit;
 
 import java.io.File;
+import java.util.List;
 
 @CapacitorPlugin(name = "FFmpeg")
 public class FFmpegPlugin extends Plugin {
@@ -33,7 +37,7 @@ public class FFmpegPlugin extends Plugin {
         String path = PathUtils.getRealPath(mContext, input);
         final File videoFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
                 String.format("FFNoctuleRoom/%s", name));
-        String command = String.format("-i %s -vf %s %s", path, filter, videoFile.getAbsolutePath());
+        String command = String.format("-i %s %s %s", path, filter, videoFile.getAbsolutePath());
         FFmpegSession session = FFmpegKit.execute(command);
         if (ReturnCode.isSuccess(session.getReturnCode())) {
             JSObject ret = new JSObject();
@@ -54,9 +58,19 @@ public class FFmpegPlugin extends Plugin {
         }
     }
 
-    @PluginMethod(returnType = PluginMethod.RETURN_CALLBACK)
-    public void geLogs(PluginCall call) {
-        call.setKeepAlive(true);
-
-    }
+//    @PluginMethod(returnType = PluginMethod.RETURN_CALLBACK)
+//    public void getStatistics(PluginCall call) {
+//        call.setKeepAlive(true);
+//        int id = call.getInt("sessionId");
+//        List<Session> sessions = FFmpegKitConfig.getSessions();
+//        Session session = sessions.get(id);
+//        FFmpegKitConfig.enableStatisticsCallback(new StatisticsCallback() {
+//            @Override
+//            public void apply(final Statistics newStatistics) {
+//                JSObject ret = new JSObject();
+//                ret.put("value", newStatistics);
+//                call.resolve(ret);
+//            }
+//        });
+//    }
 }

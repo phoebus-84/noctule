@@ -15,7 +15,7 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(TEE.class);
         super.onCreate(savedInstanceState);
 
-        final File f = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "FFnoctuleRoom");
+        final File f = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "FFNoctuleRoom");
 
         if (!f.exists()) {
             f.mkdir();

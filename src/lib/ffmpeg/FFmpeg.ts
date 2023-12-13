@@ -1,11 +1,13 @@
 import FFmpeg from '$lib/nativeHooks/FFmpegPlugin';
-import { z, type ZodSchema } from 'zod';
-
-const destinationFolder = '/storage/emulated/0/Download/';
+import { z } from 'zod';
 
 type Extension = 'mp4' | 'avi' | 'mov';
 
-export class Filter<T> {
+function parseCommand(format: string, ...args: any[]): string {
+	return format.replace(/%s/g, () => args.shift());
+}
+
+export class Filter<T extends { [s: string]: unknown } | null> {
 	name: string;
 	description: string;
 	command: string;
@@ -21,25 +23,28 @@ export class Filter<T> {
 	apply = async (input: string, fileType: Extension = 'mp4') => {
 		const outputName = `${this.name}-${Date.now().valueOf()}.${fileType}`;
 		const res = await FFmpeg.execute({
-			// value: `-i /storage/emulated/0/DCIM/Camera/VID_20231206_213225.mp4 -vf ${this.command}  /storage/emulated/0/DCIM/Camera/${destinationName}.mp4`
-			// value: `-i ${input} -vf ${this.command} ${destinationFolder}${destinationName}.${fileType}`
-			input:input,
+			input: input,
 			outputName,
-			command:this.command
-			// value: '-h'
+			command: this.getCommand()
 		});
 		return { value: res.value, input };
+	};
+
+	getCommand = () => (this.parameters ? parseCommand(this.command, Object.values(this.parameters)) : this.command);
+
+	setParameters = (parameters: T) => {
+		this.parameters = parameters;
 	};
 }
 
 const mirror = new Filter(
 	'mirror',
 	'split and speculate screen',
-	'crop=iw/2:ih:0:0,split[left][tmp];[tmp]hflip[right];[left][right] hstack=inputs=2',
+	'-vf "crop=iw/2:ih:0:0,split[left][tmp];[tmp]hflip[right];[left][right] hstack=inputs=2"',
 	null
 );
 
-const negate = new Filter<null>('negate', 'negative colors filter', 'negate', null);
+const negate = new Filter<null>('negate', 'negative colors filter', '-vf negate', null);
 
 const glitch = new Filter(
 	'glitch',
@@ -47,12 +52,20 @@ const glitch = new Filter(
 	'frei0r=filter_name=glitch0r:0.4|0.001|1|1',
 	null
 );
+const motionExtractorParametersSchema = z.object({
+	startFrame: z.number()
+});
 
-const motionExtractor = new Filter(
+type MotionExtractorParameters = z.infer<typeof motionExtractorParametersSchema>;
+
+const motionExtractor = new Filter<MotionExtractorParameters>(
 	'motion-etxraction',
 	'highlight motion',
-	'-filter_complex "[0:v] negate [a]; [a] format=yuva444p,colorchannelmixer=aa=0.5 [b]; [1:v] [b] overlay [out];" -map "[out]"',
-	null
-)
+	'-filter_complex "[0:v] split  [a][c]; [a] negate, trim=start_frame=%s,setpts=N/FR/TB, format=yuva444p,colorchannelmixer=aa=0.5 [b]; [c] [b] overlay;"',
+	{ startFrame: 20 }
+);
 
-export const filters = [mirror, negate, glitch];
+const chromakeyDefaultParameters: { color: string } = { color: 'green' };
+const chromakey = new Filter('green', 'transparent pixel for color', '-vf chromakey=%s', chromakeyDefaultParameters);
+
+export const filters = [mirror, negate, glitch, motionExtractor, chromakey];
