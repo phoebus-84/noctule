@@ -74,11 +74,11 @@
 				{#if field.type === 'string'}
 					<ion-input
 						type="text"
-						name={field.name}
-						label={field.name}
+						name={name}
+						label={name}
 						value={field.defaultValue}
 						on:ionInput={(e) => {
-							$store[field.name] = e.target.value;
+							$store[name] = e.target.value;
 						}}
 						disabled={loading}
 					/>
@@ -86,11 +86,11 @@
 				{#if field.type === 'number'}
 					<ion-input
 						type="number"
-						name={field.name}
-						label={field.name}
-						value={$store[field.name]}
+						name={name}
+						label={name}
+						value={$store[name]}
 						on:ionInput={(e) => {
-							$store[field.name] = Number(e.target.value);
+							$store[name] = Number(e.target.value);
 						}}
 						disabled={loading}
 					/>

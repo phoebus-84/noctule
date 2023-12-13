@@ -7,7 +7,7 @@
 	let video: { name: string | undefined; path: string | undefined; video: any } | undefined;
 	let filter: Filter<{ [s: string]: unknown } | null>;
 	let err: any;
-	let res: string;
+	let res: string | undefined;
 	let loading = false;
 	let command: string;
 	const pickVideos = async () => {
@@ -25,6 +25,7 @@
 			});
 	};
 	const submit = async () => {
+		res = undefined
 		loading = true;
 		if (video?.path) {
 			command = filter.getCommand();
@@ -44,14 +45,13 @@
 </ion-header>
 
 <ion-content fullscreen class="ion-padding">
-	<!-- <ion-card>
-		<ion-card-content>
-			Frei0r is a minimalistic plugin API for video effects. The main emphasis is on simplicity for an API that will
-			round up the most common video effects into simple filters, sources and mixers that can be controlled by
-			parameters. It’s our hope that this way these simple effects can be shared between many applications, avoiding
-			their reimplementation by different projects.
-		</ion-card-content>
-	</ion-card> -->
+	<ion-item>
+		<ion-text>
+			Welcome to FFNoctuleRoom, your go-to video processing app! Easily enhance and modify your videos with a variety of
+			filters. Pick a video, choose a filter, adjust parameters, and watch your creativity come to life. Explore the
+			world of video effects effortlessly with FFNoctuleRoom
+		</ion-text>
+	</ion-item>
 	<ion-list>
 		<ion-item>
 			{#if video}
