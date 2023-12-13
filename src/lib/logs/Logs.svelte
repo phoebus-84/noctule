@@ -47,7 +47,6 @@
 	{#each logs as log}
 		{#if log}
 			<div class="border-b-1 mt-0.5 border-gray-600">
-                <div class="hidden bg-blue-500 bg-red-500"/>
 				<ion-chip class={`bg-${colorLevel(log.level)} text-white text-xs rounded-sm`}>
 					{log.level}
 				</ion-chip>
