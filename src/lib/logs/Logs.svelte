@@ -9,7 +9,6 @@
 
 	let logs: (Log | null)[] = [];
 
-	let logArray: any[] = [];
 	function parseLogs() {
 		try {
 			const regex = /Log\{sessionId=(.*?),\s*level=(.*?),\s*message='(.*?[^\\])'\}/g;

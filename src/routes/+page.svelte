@@ -1,12 +1,15 @@
 <script lang="ts">
 	import { Filter, filters } from '$lib/ffmpeg/FFmpeg';
+	import ParametersFields from '$lib/forms/ParametersFields.svelte';
 	import Logs from '$lib/logs/Logs.svelte';
 	import { FilePicker } from '@capawesome/capacitor-file-picker';
 
 	let video: { name: string | undefined; path: string | undefined; video: any } | undefined;
 	let filter: Filter<{ [s: string]: unknown } | null>;
 	let err: any;
-	let res = '';
+	let res: string;
+	let loading = false;
+	let command: string;
 	const pickVideos = async () => {
 		await FilePicker.pickFiles({
 			readData: false,
@@ -22,7 +25,12 @@
 			});
 	};
 	const submit = async () => {
-		if (video?.path) await filter.apply(video.path).then((r) => (res = r.value));
+		loading = true;
+		if (video?.path) {
+			command = filter.getCommand();
+			res = await filter.apply(video.path).then((r) => (res = r.value));
+		}
+		loading = false;
 	};
 </script>
 
@@ -44,40 +52,48 @@
 			their reimplementation by different projects.
 		</ion-card-content>
 	</ion-card> -->
-	<form on:submit={submit}>
-		<ion-list>
+	<ion-list>
+		<ion-item>
+			{#if video}
+				<ion-text>{video.name}</ion-text>
+			{:else}
+				<div />
+			{/if}
+			<ion-button on:click={pickVideos} disabled={loading} slot="end">pick a video</ion-button>
+		</ion-item>
+		<ion-item>
+			<ion-select
+				label="Choose a filter"
+				disabled={loading}
+				placeholder="..."
+				on:ionChange={(e) => {
+					filter = e.detail.value;
+				}}
+			>
+				{#each filters as filter}
+					<ion-select-option value={filter}>{filter.name}</ion-select-option>
+				{/each}
+			</ion-select>
+		</ion-item>
+		{#if video?.path && filter?.parameters}
+			<ParametersFields {filter} {submit} {loading} />
+		{:else if video?.path && filter}
 			<ion-item>
-				{#if video}
-					<ion-text>{video.name}</ion-text>
-				{:else}
-					<div />
-				{/if}
-				<ion-button on:click={pickVideos} slot="end">pick a video</ion-button>
+				<ion-button slot="end" on:click={submit} disabled={loading}>apply</ion-button>
 			</ion-item>
+		{/if}
+		{#if loading}
+			<ion-spinner name="lines-sharp" />
+		{/if}
+		{#if command}
 			<ion-item>
-				<ion-select
-					label="Choose a filter"
-					placeholder="..."
-					on:ionChange={(e) => {
-						filter = e.detail.value;
-					}}
-				>
-					{#each filters as filter}
-						<ion-select-option value={filter}>{filter.name}</ion-select-option>
-					{/each}
-				</ion-select>
+				{command}
 			</ion-item>
+		{/if}
+		{#if res}
 			<ion-item>
-				<ion-button type="submit" slot="end">apply</ion-button>
+				<Logs logString={res} />
 			</ion-item>
-			<ion-item>
-				{filter?.getCommand()}
-				<ion-item>
-					{#key res}
-						<Logs logString={res} />
-					{/key}
-				</ion-item>
-			</ion-item></ion-list
-		>
-	</form>
+		{/if}
+	</ion-list>
 </ion-content>

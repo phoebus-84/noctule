@@ -11,13 +11,15 @@ export class Filter<T extends { [s: string]: unknown } | null> {
 	name: string;
 	description: string;
 	command: string;
+	schema: z.AnyZodObject | undefined;
 	parameters: T;
 
-	constructor(name: string, description: string, command: string, parameters: T) {
+	constructor(name: string, description: string, command: string, parameters: T, schema?: z.AnyZodObject) {
 		this.name = name;
 		this.description = description;
 		this.parameters = parameters;
 		this.command = command;
+		this.schema = schema;
 	}
 
 	apply = async (input: string, fileType: Extension = 'mp4') => {
@@ -52,7 +54,7 @@ const glitch = new Filter(
 	'frei0r=filter_name=glitch0r:0.4|0.001|1|1',
 	null
 );
-const motionExtractorParametersSchema = z.object({
+export const motionExtractorParametersSchema = z.object({
 	startFrame: z.number()
 });
 
@@ -62,10 +64,22 @@ const motionExtractor = new Filter<MotionExtractorParameters>(
 	'motion-etxraction',
 	'highlight motion',
 	'-filter_complex "[0:v] split  [a][c]; [a] negate, trim=start_frame=%s,setpts=N/FR/TB, format=yuva444p,colorchannelmixer=aa=0.5 [b]; [c] [b] overlay;"',
-	{ startFrame: 20 }
+	{ startFrame: 20 },
+	motionExtractorParametersSchema
 );
 
-const chromakeyDefaultParameters: { color: string } = { color: 'green' };
-const chromakey = new Filter('green', 'transparent pixel for color', '-vf chromakey=%s', chromakeyDefaultParameters);
+const chromakeyParametersSchema = z.object({
+	color: z.string()
+});
+
+type ChromakeyParameters = z.infer<typeof chromakeyParametersSchema>;
+const chromakeyDefaultParameters: ChromakeyParameters = { color: 'green' };
+const chromakey = new Filter(
+	'chromakey',
+	'transparent pixel for color',
+	'-vf chromakey=%s',
+	chromakeyDefaultParameters,
+	chromakeyParametersSchema
+);
 
 export const filters = [mirror, negate, glitch, motionExtractor, chromakey];
