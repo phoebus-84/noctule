@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="fastlane.lanes">
+    
+    
+    
+      
+      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.000175">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="1: pnpm install" time="0.847308">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="2: ionic cap sync android" time="7.911826">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="3: ionic cap build android --no-open" time="6.410638">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="4: cd ../android &amp;&amp; ./gradlew bundleRelease" time="7.106594">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="5: echo $PWD" time="0.016939">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="6: bundletool" time="4.833556">
+        
+      </testcase>
+    
+  </testsuite>
+</testsuites>
