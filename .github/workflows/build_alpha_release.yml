@@ -2,8 +2,7 @@ name: Build alpha release
 
 on:
   push:
-    tags:
-      - '*'
+    branches: ['main']
 
 jobs:
   build_android:
