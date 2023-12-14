@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
 	import type { Filter } from '$lib/ffmpeg/FFmpeg';
 	import zodKeys from '$lib/utils/zodKeys';
 	import { writable } from 'svelte/store';
@@ -27,7 +26,7 @@
 		type: 'enum';
 		name: string;
 		defaultValue: number;
-		list: string[];
+		list: any;
 	};
 
 	type Field = StringField | NumberField | BooleanField | ListField;
@@ -42,7 +41,7 @@
 		keys.forEach((k) => {
 			const keyType = filter.schema!.shape[k];
 			if (keyType instanceof ZodEnum) {
-				fields.push({ name: k, type: 'enum', defaultValue: filter.parameters[k], list: zodKeys(keyType.Enum.value) });
+				fields.push({ name: k, type: 'enum', defaultValue: filter.parameters[k], list: (keyType as ZodEnum<[string, ...string[]]>).Values });
 			} else if (typeof filter.parameters[k] === 'string') {
 				fields.push({ name: k, type: 'string', defaultValue: filter.parameters[k] });
 			} else if (typeof filter.parameters[k] === 'number') {
@@ -53,8 +52,6 @@
 		});
 		return fields;
 	};
-	let ff: any;
-	// let formData: typeof filter.parameters;
 	const store = writable(filter.parameters);
 
 	const onSubmit = () => {
@@ -65,16 +62,13 @@
 
 {#if filter?.parameters}
 	<form on:submit|preventDefault={onSubmit}>
-		<!-- <ion-item>
-			<ion-input type="text" name="filter" label="po" value="po" />
-		</ion-item> -->
 		{#each getFields() as field}
-			{@const { name, defaultValue } = field}
+			{@const { name } = field}
 			<ion-item>
 				{#if field.type === 'string'}
 					<ion-input
 						type="text"
-						name={name}
+						{name}
 						label={name}
 						value={field.defaultValue}
 						on:ionInput={(e) => {
@@ -82,11 +76,10 @@
 						}}
 						disabled={loading}
 					/>
-				{/if}
-				{#if field.type === 'number'}
+				{:else if field.type === 'number'}
 					<ion-input
 						type="number"
-						name={name}
+						{name}
 						label={name}
 						value={$store[name]}
 						on:ionInput={(e) => {
@@ -94,11 +87,9 @@
 						}}
 						disabled={loading}
 					/>
-				{/if}
-				{#if field.type === 'boolean'}
+				{:else if field.type === 'boolean'}
 					<ion-checkbox {name} checked={field.defaultValue} />
-				{/if}
-				{#if field.type === 'enum'}
+				{:else if field.type === 'enum'}
 					<ion-select label={field.name} placeholder={field.defaultValue.toString()}>
 						{#each field.list as option}
 							<ion-select-option value={option}>{option}</ion-select-option>
@@ -110,6 +101,5 @@
 		<ion-item>
 			<ion-button type="submit" slot="end" disabled={loading}>apply</ion-button>
 		</ion-item>
-		{JSON.stringify({ k: filter.parameters, r: $store })}
 	</form>
 {/if}

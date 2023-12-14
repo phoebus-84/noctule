@@ -4,7 +4,10 @@ import { z } from 'zod';
 type Extension = 'mp4' | 'avi' | 'mov';
 
 function parseCommand(format: string, ...args: any[]): string {
-	return format.replace(/%s/g, () => args.shift());
+	return format.replace(/%s/g, () => {
+		const arg = args.shift();
+		return arg !== undefined ? arg : '';
+	});
 }
 
 export class Filter<T extends { [s: string]: unknown } | null> {
@@ -32,7 +35,13 @@ export class Filter<T extends { [s: string]: unknown } | null> {
 		return { value: res.value, input };
 	};
 
-	getCommand = () => (this.parameters ? parseCommand(this.command, Object.values(this.parameters)) : this.command);
+	getCommand = () => {
+		if (this.parameters) {
+			const parameterValues = Object.values(this.parameters);
+			return parseCommand(this.command, ...parameterValues);
+		}
+		return this.command;
+	};
 
 	setParameters = (parameters: T) => {
 		this.parameters = parameters;
@@ -145,14 +154,28 @@ const fadeInOut = new Filter<FadeInOutParameters>(
 
 // 5. Blur Filter
 const blurParametersSchema = z.object({
-	strength: z.number()
+	cropWidth: z.number(),
+	cropHeight: z.number(),
+	cropX: z.number(),
+	cropY: z.number(),
+	strength: z.number(),
+	overlayX: z.number(),
+	overlayY: z.number()
 });
 type BlurParameters = z.infer<typeof blurParametersSchema>;
-const blurDefaultParameters: BlurParameters = { strength: 5 };
+const blurDefaultParameters: BlurParameters = {
+	cropWidth: 200,
+	cropHeight: 400,
+	cropX: 300,
+	cropY: 350,
+	strength: 10,
+	overlayX: 300,
+	overlayY: 350
+};
 const blur = new Filter<BlurParameters>(
 	'blur',
-	'apply blur effect',
-	'-vf "boxblur=%s"',
+	'apply blur effect with adjustable parameters',
+	'-filter_complex "[0:v] crop=%s:%s:%s:%s ,avgblur=%s[fg]; [0:v][fg] overlay=%s:%s[v]" -map "[v]"',
 	blurDefaultParameters,
 	blurParametersSchema
 );
@@ -274,7 +297,6 @@ const slowMotion = new Filter<SlowMotionParameters>(
 	slowMotionParametersSchema
 );
 
-
 // 16. Vignette Filter
 const vignetteParametersSchema = z.object({
 	strength: z.number()
@@ -318,52 +340,88 @@ const stabilization = new Filter<null>(
 
 // 11. Brightness Filter
 const brightnessParametersSchema = z.object({
-    level: z.number(),
+	level: z.number()
 });
 type BrightnessParameters = z.infer<typeof brightnessParametersSchema>;
 const brightnessDefaultParameters: BrightnessParameters = { level: 1.5 };
-const brightness = new Filter<BrightnessParameters>('brightness', 'adjust video brightness', '-vf "eq=brightness=%s"', brightnessDefaultParameters, brightnessParametersSchema);
+const brightness = new Filter<BrightnessParameters>(
+	'brightness',
+	'adjust video brightness',
+	'-vf "eq=brightness=%s"',
+	brightnessDefaultParameters,
+	brightnessParametersSchema
+);
 
 // 12. Saturation Filter (Extended)
 const extendedSaturationParametersSchema = z.object({
-    level: z.number(),
-    contrast: z.number(),
+	level: z.number(),
+	contrast: z.number()
 });
 type ExtendedSaturationParameters = z.infer<typeof extendedSaturationParametersSchema>;
 const extendedSaturationDefaultParameters: ExtendedSaturationParameters = { level: 1.5, contrast: 1.2 };
-const extendedSaturation = new Filter<ExtendedSaturationParameters>('extended_saturation', 'adjust video saturation and contrast', '-vf "eq=saturation=%s:contrast=%s"', extendedSaturationDefaultParameters, extendedSaturationParametersSchema);
+const extendedSaturation = new Filter<ExtendedSaturationParameters>(
+	'extended_saturation',
+	'adjust video saturation and contrast',
+	'-vf "eq=saturation=%s:contrast=%s"',
+	extendedSaturationDefaultParameters,
+	extendedSaturationParametersSchema
+);
 
 // 13. Speed Up Filter
 const speedUpParametersSchema = z.object({
-    speed: z.number(),
+	speed: z.number()
 });
 type SpeedUpParameters = z.infer<typeof speedUpParametersSchema>;
 const speedUpDefaultParameters: SpeedUpParameters = { speed: 1.5 };
-const speedUp = new Filter<SpeedUpParameters>('speed_up', 'increase video playback speed', '-vf setpts=%s*PTS', speedUpDefaultParameters, speedUpParametersSchema);
+const speedUp = new Filter<SpeedUpParameters>(
+	'speed_up',
+	'increase video playback speed',
+	'-vf setpts=%s*PTS',
+	speedUpDefaultParameters,
+	speedUpParametersSchema
+);
 
 // 14. Darken Filter
 const darkenParametersSchema = z.object({
-    level: z.number(),
+	level: z.number()
 });
 type DarkenParameters = z.infer<typeof darkenParametersSchema>;
 const darkenDefaultParameters: DarkenParameters = { level: 0.8 };
-const darken = new Filter<DarkenParameters>('darken', 'darken video', '-vf "eq=brightness=%s"', darkenDefaultParameters, darkenParametersSchema);
+const darken = new Filter<DarkenParameters>(
+	'darken',
+	'darken video',
+	'-vf "eq=brightness=%s"',
+	darkenDefaultParameters,
+	darkenParametersSchema
+);
 
 // 15. High Pass Filter
 const highPassParametersSchema = z.object({
-    cutoff: z.number(),
+	cutoff: z.number()
 });
 type HighPassParameters = z.infer<typeof highPassParametersSchema>;
 const highPassDefaultParameters: HighPassParameters = { cutoff: 200 };
-const highPass = new Filter<HighPassParameters>('high_pass', 'apply high pass filter', '-vf "highpass=f=%s"', highPassDefaultParameters, highPassParametersSchema);
+const highPass = new Filter<HighPassParameters>(
+	'high_pass',
+	'apply high pass filter',
+	'-vf "highpass=f=%s"',
+	highPassDefaultParameters,
+	highPassParametersSchema
+);
 
 // 16. Low Pass Filter
 const lowPassParametersSchema = z.object({
-    cutoff: z.number(),
+	cutoff: z.number()
 });
 type LowPassParameters = z.infer<typeof lowPassParametersSchema>;
 const lowPassDefaultParameters: LowPassParameters = { cutoff: 800 };
-const lowPass = new Filter<LowPassParameters>('low_pass', 'apply low pass filter', '-vf "lowpass=f=%s"', lowPassDefaultParameters, lowPassParametersSchema);
+const lowPass = new Filter<LowPassParameters>(
+	'low_pass',
+	'apply low pass filter',
+	'-vf "lowpass=f=%s"',
+	lowPassDefaultParameters,
+	lowPassParametersSchema
+);
 
 // 17. Mirror Horizontal Filter
 const mirrorHorizontal = new Filter<null>('mirror_horizontal', 'create a horizontal mirror effect', '-vf hflip', null);
@@ -373,20 +431,32 @@ const mirrorVertical = new Filter<null>('mirror_vertical', 'create a vertical mi
 
 // 19. Fade Filter
 const fadeParametersSchema = z.object({
-    type: z.string(),
+	type: z.string()
 });
 type FadeParameters = z.infer<typeof fadeParametersSchema>;
 const fadeDefaultParameters: FadeParameters = { type: 'in' };
-const fade = new Filter<FadeParameters>('fade', 'apply fade in/out effect', '-vf "fade=%s:st=0:d=5"', fadeDefaultParameters, fadeParametersSchema);
+const fade = new Filter<FadeParameters>(
+	'fade',
+	'apply fade in/out effect',
+	'-vf "fade=%s:st=0:d=5"',
+	fadeDefaultParameters,
+	fadeParametersSchema
+);
 
 // 20. Resize Filter
 const resizeParametersSchema = z.object({
-    width: z.number(),
-    height: z.number(),
+	width: z.number(),
+	height: z.number()
 });
 type ResizeParameters = z.infer<typeof resizeParametersSchema>;
 const resizeDefaultParameters: ResizeParameters = { width: 640, height: 480 };
-const resize = new Filter<ResizeParameters>('resize', 'resize video dimensions', '-vf scale=%s:%s', resizeDefaultParameters, resizeParametersSchema);
+const resize = new Filter<ResizeParameters>(
+	'resize',
+	'resize video dimensions',
+	'-vf scale=%s:%s',
+	resizeDefaultParameters,
+	resizeParametersSchema
+);
 
 export const filters = [
 	mirror,

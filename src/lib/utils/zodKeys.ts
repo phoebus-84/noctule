@@ -22,4 +22,4 @@ const zodKeys = <T extends z.ZodTypeAny>(schema: T): string[] => {
 	// return empty array
 	return [];
 };
-export default zodKeys
+export default zodKeys;
