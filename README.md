@@ -1,4 +1,7 @@
 ### Notes
+**alpha release**
+
+./release/universal.apk
 
 **Path bug**
 
