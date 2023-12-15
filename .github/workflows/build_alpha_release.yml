@@ -74,7 +74,7 @@ jobs:
       version: ${{ steps.tag_release.outputs.version }}
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Node.js
+      - name: Setup Node.js 18
         uses: actions/setup-node@v4
         with:
           node-version: 18.x
@@ -100,7 +100,7 @@ jobs:
           fi
           echo "Result"
           cat $GITHUB_OUTPUT
-
+  
   draft-release:
     permissions:
       contents: write
