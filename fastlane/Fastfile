@@ -27,6 +27,7 @@ platform :android do
 
   desc "Deploy alpha version"
   lane :alpha do
+    sh "pnpm install -g @ionic/cli"
     sh "pnpm install"
     sh "ionic cap sync android"
     sh "ionic cap build android --no-open"
