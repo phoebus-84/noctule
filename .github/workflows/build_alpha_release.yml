@@ -64,6 +64,8 @@ jobs:
 #            README.md
 
   semantic-release:
+    permissions:
+      contents: write
     needs: build_android
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
