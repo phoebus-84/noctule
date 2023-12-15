@@ -56,8 +56,12 @@
 		"@capawesome/capacitor-file-picker": "^5.1.1",
 		"@efstajas/svelte-stepper": "^0.2.0",
 		"@ionic/core": "^7.4.3",
+		"@semantic-release/changelog": "^6.0.3",
+		"@semantic-release/commit-analyzer": "^11.1.0",
+		"@semantic-release/release-notes-generator": "^12.1.0",
 		"ionic-svelte": "^0.5.82",
 		"ionicons": "^7.1.2",
+		"semantic-release": "^22.0.12",
 		"sveltekit-superforms": "^1.8.0",
 		"zod": "^3.22.4"
 	}
