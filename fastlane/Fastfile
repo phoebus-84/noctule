@@ -53,5 +53,9 @@ platform :android do
       verbose: true,
       cache_path: CACHE_PATH
     )
+    copy_artifacts(
+      target_path: "release",
+      artifacts: ["*.apk"]
+    )
   end
 end
