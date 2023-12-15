@@ -117,7 +117,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            noctule-release/*
+            noctule-release/noctule/*
           # append_body: true
           # body_path: ncr-release/readme/README.md
           draft: false
