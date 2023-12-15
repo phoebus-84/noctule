@@ -7,6 +7,8 @@ on:
 jobs:
   build_android:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v3
       - name: Install Node.js
@@ -38,11 +40,10 @@ jobs:
         with:
           fileName: android_keystore.keystore
           encodedString: ${{ secrets.ANDROID_KEYSTORE_FILE }}
-      - uses: actions/checkout@v3
       - uses: ruby/setup-ruby@v1
         with:
-            ruby-version: '3.0'
-            bundler-cache: true
+          ruby-version: '3.0'
+          bundler-cache: true
       - uses: maierj/fastlane-action@v3.0.0
         env:
           KEYSTORE_PATH: ${{ steps.android_keystore.outputs.filePath }}
@@ -50,5 +51,8 @@ jobs:
           KEYSTORE_KEY_PASSWORD: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
           KEYSTORE_STORE_PASSWORD: ${{ secrets.KEYSTORE_STORE_PASSWORD }}
         with:
-            lane: alpha
-            
+          lane: alpha
+      - uses: EndBug/add-and-commit@v9
+        with:
+          add: 'release'
+          default_author: user_info
