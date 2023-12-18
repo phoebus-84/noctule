@@ -4,6 +4,7 @@
 	import Logs from '$lib/logs/Logs.svelte';
 	import { FilePicker } from '@capawesome/capacitor-file-picker';
 	import { Camera } from '@capacitor/camera';
+	import { goto } from '$app/navigation';
 
 	let video: { name: string | undefined; path: string | undefined; video: any } | undefined;
 	let filter: Filter<{ [s: string]: unknown } | null>;
@@ -56,16 +57,16 @@
 		<ion-buttons slot="start">
 			<ion-menu-button />
 		</ion-buttons>
-		<ion-title>FFNoctuleRoom</ion-title>
+		<ion-title>Noctule</ion-title>
 	</ion-toolbar>
 </ion-header>
 
 <ion-content fullscreen class="ion-padding">
 	<ion-item>
 		<ion-text>
-			Welcome to FFNoctuleRoom, your go-to video processing app! Easily enhance and modify your videos with a variety of
+			Welcome to Noctule, your go-to video processing app! Easily enhance and modify your videos with a variety of
 			filters. Pick a video, choose a filter, adjust parameters, and watch your creativity come to life. Explore the
-			world of video effects effortlessly with FFNoctuleRoom
+			world of video effects effortlessly with Noctule pippo
 		</ion-text></ion-item
 	>
 	<ion-list>
@@ -75,7 +76,7 @@
 			{:else}
 				<div />
 			{/if}
-			<ion-button on:click={pickVideos} disabled={loading} slot="end">pick a video</ion-button>
+			<ion-button on:click={()=>goto("/new")} disabled={loading} slot="end">pick a video</ion-button>
 		</ion-item>
 		<ion-item>
 			<ion-select
@@ -104,7 +105,7 @@
 		{#if command}
 			<ion-item>
 				<code
-					class="inline-flex items-center space-x-4 rounded-lg bg-gray-800 p-4 pl-6 text-left text-sm text-white sm:text-base my-2"
+					class="my-2 inline-flex items-center space-x-4 rounded-lg bg-gray-800 p-4 pl-6 text-left text-sm text-white sm:text-base"
 				>
 					<span class="flex gap-4">
 						<span class="shrink-0 text-gray-500"> $ </span>

@@ -33,7 +33,6 @@
 
 	export let filter: Filter<any>;
 	export let submit: () => void;
-	export let loading: boolean;
 
 	$: getFields = () => {
 		const keys = zodKeys(filter.schema!);
@@ -41,7 +40,12 @@
 		keys.forEach((k) => {
 			const keyType = filter.schema!.shape[k];
 			if (keyType instanceof ZodEnum) {
-				fields.push({ name: k, type: 'enum', defaultValue: filter.parameters[k], list: (keyType as ZodEnum<[string, ...string[]]>).Values });
+				fields.push({
+					name: k,
+					type: 'enum',
+					defaultValue: filter.parameters[k],
+					list: (keyType as ZodEnum<[string, ...string[]]>).Values
+				});
 			} else if (typeof filter.parameters[k] === 'string') {
 				fields.push({ name: k, type: 'string', defaultValue: filter.parameters[k] });
 			} else if (typeof filter.parameters[k] === 'number') {
@@ -74,7 +78,6 @@
 						on:ionInput={(e) => {
 							$store[name] = e.target.value;
 						}}
-						disabled={loading}
 					/>
 				{:else if field.type === 'number'}
 					<ion-input
@@ -85,7 +88,6 @@
 						on:ionInput={(e) => {
 							$store[name] = Number(e.target.value);
 						}}
-						disabled={loading}
 					/>
 				{:else if field.type === 'boolean'}
 					<ion-checkbox {name} checked={field.defaultValue} />
@@ -99,7 +101,7 @@
 			</ion-item>
 		{/each}
 		<ion-item>
-			<ion-button type="submit" slot="end" disabled={loading}>apply</ion-button>
+			<ion-button type="submit" slot="end">apply</ion-button>
 		</ion-item>
 	</form>
 {/if}
