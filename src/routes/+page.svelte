@@ -1,16 +1,9 @@
 <script lang="ts">
-	import type { Filter } from '$lib/ffmpeg/FFmpeg';
-	import { FilePicker } from '@capawesome/capacitor-file-picker';
 	import { Camera } from '@capacitor/camera';
 	import { goto } from '$app/navigation';
 	import FFmpeg from '$lib/nativeHooks/FFmpegPlugin';
 
-	let video: { name: string | undefined; path: string | undefined; video: any } | undefined;
-	let filter: Filter<{ [s: string]: unknown } | null>;
-	let err: any;
-	let res: string | undefined;
 	let loading = false;
-	let command: string;
 	let permissionsGranted = true;
 
 	const checkPermissions = async () => {
@@ -26,29 +19,6 @@
 	};
 	checkPermissions();
 
-	const pickVideos = async () => {
-		await FilePicker.pickFiles({
-			readData: false,
-			multiple: false
-		})
-			.then((r) => {
-				const path = r.files[0].path;
-				const name = r.files[0].name;
-				if (path && name) video = { path, name, video: r.files[0] };
-			})
-			.catch((e) => {
-				err = e;
-			});
-	};
-	const submit = async () => {
-		res = undefined;
-		loading = true;
-		if (video?.path) {
-			command = filter.getCommand();
-			res = await filter.apply(video.path).then((r) => (res = r.value));
-		}
-		loading = false;
-	};
 	const sessions = async () => {
 		return await FFmpeg.getSessions();
 	};
@@ -73,12 +43,7 @@
 	>
 	<ion-list>
 		<ion-item>
-			{#if video}
-				<ion-text>{video.name}</ion-text>
-			{:else}
-				<div />
-			{/if}
-			<ion-button on:click={() => goto('/new')} disabled={loading} slot="end">+ new</ion-button>
+			<ion-button href="/new" disabled={loading} slot="end">+ new</ion-button>
 		</ion-item>
 		{#await sessions()}
 			sessions list...
@@ -99,7 +64,7 @@
 							</span>
 						</div>
 						<div slot="end">
-							<ion-button on:click={()=>goto("/session/id")}>see</ion-button>
+							<ion-fab-button size="small" href={`/session?id=${session.sessionId}`}>see</ion-fab-button>
 						</div>
 					</ion-item>
 				{/each}

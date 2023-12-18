@@ -12,8 +12,6 @@ import com.arthenica.ffmpegkit.FFmpegSession;
 import com.arthenica.ffmpegkit.ReturnCode;
 import com.arthenica.ffmpegkit.Session;
 import com.arthenica.ffmpegkit.SessionState;
-import com.arthenica.ffmpegkit.Statistics;
-import com.arthenica.ffmpegkit.StatisticsCallback;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.getcapacitor.JSObject;
@@ -69,7 +67,20 @@ public class FFmpegPlugin extends Plugin {
         }
     }
     @PluginMethod()
-    public void getSessions(PluginCall call) throws JsonProcessingException {
+    public void getSession(PluginCall call)  {
+        int sessionId = call.getInt("sessionId");
+        Session session = FFmpegKitConfig.getSession(sessionId);
+        JSObject ret = new JSObject();
+        ret.put("logs", session.getAllLogs());
+        ret.put("command", session.getCommand());
+        ret.put("arguments", session.getArguments());
+        ret.put("startTime", session.getStartTime());
+        ret.put("endTime", session.getEndTime());
+        ret.put("duration", session.getDuration());
+        call.resolve(ret);
+    }
+    @PluginMethod()
+    public void getSessions(PluginCall call) {
         List<Session> sessionList = FFmpegKitConfig.getSessions();
         List<Object> mappedList = new ArrayList<>();
         for (Session session : sessionList) {

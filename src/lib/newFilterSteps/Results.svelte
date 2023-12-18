@@ -23,17 +23,17 @@
 			</span>
 		</code>
 	</ion-item>
-     <ion-item>
-            {$context.results?.statistics}
-    </ion-item>
+	<ion-item>
+		{$context.results?.statistics}
+	</ion-item>
 	<ion-item>
 		<ion-label class="font-bold text-blue-400">Logs:</ion-label>
 	</ion-item>
-   
+
 	<ion-item>
 		<Logs logString={$context.results?.logs} />
 	</ion-item>
 	<ion-item>
-		<ion-button slot="end" on:click={() => goto('/')}>exit</ion-button>
+		<ion-button href="/">exit</ion-button>
 	</ion-item>
 </ion-list>
