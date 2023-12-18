@@ -43,7 +43,7 @@
 	$: parseLogs();
 </script>
 
-<div class="w-full max-h-96 overflow-y-auto bg-gray-800 p-4 text-gray-200">
+<div class="w-full max-h-96 overflow-y-auto bg-gray-800 p-4 text-gray-200 rounded-lg">
 	{#each logs as log}
 		{#if log}
 			<div class="border-b-1 mt-0.5 border-gray-600">

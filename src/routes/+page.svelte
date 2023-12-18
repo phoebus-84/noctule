@@ -76,55 +76,7 @@
 			{:else}
 				<div />
 			{/if}
-			<ion-button on:click={()=>goto("/new")} disabled={loading} slot="end">pick a video</ion-button>
+			<ion-button on:click={() => goto('/new')} disabled={loading} slot="end">+ new</ion-button>
 		</ion-item>
-		<ion-item>
-			<ion-select
-				label="Choose a filter"
-				disabled={loading}
-				placeholder="..."
-				on:ionChange={(e) => {
-					filter = e.detail.value;
-				}}
-			>
-				{#each filters as filter}
-					<ion-select-option value={filter}>{filter.name}</ion-select-option>
-				{/each}
-			</ion-select>
-		</ion-item>
-		{#if video?.path && filter?.parameters}
-			<ParametersFields {filter} {submit} {loading} />
-		{:else if video?.path && filter}
-			<ion-item>
-				<ion-button slot="end" on:click={submit} disabled={loading}>apply</ion-button>
-			</ion-item>
-		{/if}
-		{#if loading}
-			<ion-spinner name="lines-sharp" />
-		{/if}
-		{#if command}
-			<ion-item>
-				<code
-					class="my-2 inline-flex items-center space-x-4 rounded-lg bg-gray-800 p-4 pl-6 text-left text-sm text-white sm:text-base"
-				>
-					<span class="flex gap-4">
-						<span class="shrink-0 text-gray-500"> $ </span>
-						<span class="flex-1">
-							<span class="text-yellow-500">ffmpeg -i [INPUT] {command} [OUTPUT]</span>
-						</span>
-					</span>
-				</code>
-			</ion-item>
-		{/if}
-		{#if res}
-			<ion-accordion-group class="mt-2">
-				<ion-accordion value="logs">
-					<ion-item slot="header" color="light">
-						<ion-label>Logs</ion-label>
-					</ion-item>
-					<div class="ion-padding" slot="content"><Logs logString={res} /></div>
-				</ion-accordion>
-			</ion-accordion-group>
-		{/if}
 	</ion-list>
 </ion-content>

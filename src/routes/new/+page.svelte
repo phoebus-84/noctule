@@ -4,6 +4,7 @@
 	export interface StepperContext {
 		video: { name: string | undefined; path: string | undefined; video: any } | undefined;
 		filter: Filter<{ [s: string]: unknown } | null> | undefined;
+		results: { value: string; input: string } | undefined;
 	}
 </script>
 
@@ -16,7 +17,7 @@
 	import { Stepper, makeStep } from '@efstajas/svelte-stepper';
 	import { writable, type Writable } from 'svelte/store';
 
-	const exampleSteps = [
+	const steps = [
 		makeStep({
 			component: PickVideo,
 			props: undefined
@@ -34,8 +35,11 @@
 	const context: () => Writable<StepperContext> = () =>
 		writable({
 			video: undefined,
-			filter: undefined
+			filter: undefined,
+			results: undefined
 		});
 </script>
 
-<Stepper steps={exampleSteps} {context} />
+<ion-content fullscreen class="ion-padding">
+	<Stepper defaultTransitionDuration={0} {steps} {context} />
+</ion-content>
