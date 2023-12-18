@@ -11,8 +11,9 @@ import com.arthenica.ffmpegkit.FFmpegKitConfig;
 import com.arthenica.ffmpegkit.FFmpegSession;
 import com.arthenica.ffmpegkit.ReturnCode;
 import com.arthenica.ffmpegkit.Session;
-import com.arthenica.ffmpegkit.Statistics;
-import com.arthenica.ffmpegkit.StatisticsCallback;
+import com.arthenica.ffmpegkit.SessionState;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
@@ -21,7 +22,14 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 import com.arthenica.ffmpegkit.FFmpegKit;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
+
+
+
+
 
 @CapacitorPlugin(name = "FFmpeg")
 public class FFmpegPlugin extends Plugin {
@@ -41,7 +49,8 @@ public class FFmpegPlugin extends Plugin {
         FFmpegSession session = FFmpegKit.execute(command);
         if (ReturnCode.isSuccess(session.getReturnCode())) {
             JSObject ret = new JSObject();
-            ret.put("value", session.getAllLogs());
+            ret.put("logs", session.getAllLogs());
+            ret.put("statistics", session.getAllStatistics());
             call.resolve(ret);
         } else if (ReturnCode.isCancel(session.getReturnCode())) {
             JSObject ret = new JSObject();
@@ -52,25 +61,96 @@ public class FFmpegPlugin extends Plugin {
             Log.d(TAG, String.format("Command failed with state %s and rc %s.%s", session.getState(),
                     session.getReturnCode(), session.getFailStackTrace()));
             JSObject ret = new JSObject();
-            ret.put("value", session.getAllLogs());
+            ret.put("logs", session.getAllLogs());
             ret.put("stacktrace", session.getFailStackTrace());
             call.resolve(ret);
         }
     }
+    @PluginMethod()
+    public void getSession(PluginCall call)  {
+        int sessionId = call.getInt("sessionId");
+        Session session = FFmpegKitConfig.getSession(sessionId);
+        JSObject ret = new JSObject();
+        ret.put("logs", session.getAllLogs());
+        ret.put("command", session.getCommand());
+        ret.put("arguments", session.getArguments());
+        ret.put("startTime", session.getStartTime());
+        ret.put("endTime", session.getEndTime());
+        ret.put("duration", session.getDuration());
+        call.resolve(ret);
+    }
+    @PluginMethod()
+    public void getSessions(PluginCall call) {
+        List<Session> sessionList = FFmpegKitConfig.getSessions();
+        List<Object> mappedList = new ArrayList<>();
+        for (Session session : sessionList) {
+            long sessionId = session.getSessionId();
+            Date endTime = session.getEndTime();
+            String command = session.getCommand();
+            SessionState state = session.getState();
+            ReturnCode returnCode = session.getReturnCode();
 
-//    @PluginMethod(returnType = PluginMethod.RETURN_CALLBACK)
-//    public void getStatistics(PluginCall call) {
-//        call.setKeepAlive(true);
-//        int id = call.getInt("sessionId");
-//        List<Session> sessions = FFmpegKitConfig.getSessions();
-//        Session session = sessions.get(id);
-//        FFmpegKitConfig.enableStatisticsCallback(new StatisticsCallback() {
-//            @Override
-//            public void apply(final Statistics newStatistics) {
-//                JSObject ret = new JSObject();
-//                ret.put("value", newStatistics);
-//                call.resolve(ret);
-//            }
-//        });
-//    }
+            // Create a map for each session
+            ObjectMapper objectMapper = new ObjectMapper();
+            String jsonSessionData = "";
+            try {
+                jsonSessionData = objectMapper.writeValueAsString(
+                        new SessionData(sessionId, endTime, command, state, returnCode)
+                );
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            // Add the JSON representation of the session to the list
+            mappedList.add(jsonSessionData);
+        }
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            String json = objectMapper.writeValueAsString(mappedList);
+            JSObject ret = new JSObject();
+            ret.put("sessions", json);
+            call.resolve(ret);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
+}
+class SessionData {
+    private long sessionId;
+    private Date endTime;
+    private String command;
+    private SessionState state;
+    private ReturnCode returnCode;
+
+    public SessionData(long sessionId, Date endTime, String command, SessionState state, ReturnCode returnCode) {
+        this.sessionId = sessionId;
+        this.endTime = endTime;
+        this.command = command;
+        this.state = state;
+        this.returnCode = returnCode;
+    }
+
+    // Getters for each property
+    public long getSessionId() {
+        return sessionId;
+    }
+
+    public Date getEndTime() {
+        return endTime;
+    }
+
+    public String getCommand() {
+        return command;
+    }
+
+    public SessionState getState() {
+        return state;
+    }
+
+    public ReturnCode getReturnCode() {
+        return returnCode;
+    }
 }

@@ -32,7 +32,7 @@ export class Filter<T extends { [s: string]: unknown } | null> {
 			outputName,
 			command: this.getCommand()
 		});
-		return { value: res.value, input };
+		return { logs: res.logs, statistics: res.statistics, input: input };
 	};
 
 	getCommand = () => {
