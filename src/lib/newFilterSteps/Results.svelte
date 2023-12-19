@@ -2,7 +2,6 @@
 	import type { Writable } from 'svelte/store';
 	import type { StepperContext } from '../../routes/new/+page.svelte';
 	import Logs from '$lib/logs/Logs.svelte';
-	import { goto } from '$app/navigation';
 
 	export let context: Writable<StepperContext>;
 </script>
@@ -23,9 +22,9 @@
 			</span>
 		</code>
 	</ion-item>
-	<ion-item>
+	<!-- <ion-item>
 		{$context.results?.statistics}
-	</ion-item>
+	</ion-item> -->
 	<ion-item>
 		<ion-label class="font-bold text-blue-400">Logs:</ion-label>
 	</ion-item>

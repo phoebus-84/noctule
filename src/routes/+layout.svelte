@@ -43,5 +43,13 @@
 </script>
 
 <ion-app>
+	<ion-header translucent={true}>
+	<ion-toolbar>
+		<ion-buttons slot="start">
+			<ion-menu-button />
+		</ion-buttons>
+		<ion-title>Noctule</ion-title>
+	</ion-toolbar>
+</ion-header>
 	<slot />
 </ion-app>

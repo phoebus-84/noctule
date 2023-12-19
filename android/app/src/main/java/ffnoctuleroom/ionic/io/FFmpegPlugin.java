@@ -12,7 +12,7 @@ import com.arthenica.ffmpegkit.FFmpegSession;
 import com.arthenica.ffmpegkit.ReturnCode;
 import com.arthenica.ffmpegkit.Session;
 import com.arthenica.ffmpegkit.SessionState;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
@@ -67,7 +67,7 @@ public class FFmpegPlugin extends Plugin {
         }
     }
     @PluginMethod()
-    public void getSession(PluginCall call)  {
+    public void getSession(PluginCall call)  throws JacksonException {
         int sessionId = call.getInt("sessionId");
         Session session = FFmpegKitConfig.getSession(sessionId);
         JSObject ret = new JSObject();
@@ -80,7 +80,7 @@ public class FFmpegPlugin extends Plugin {
         call.resolve(ret);
     }
     @PluginMethod()
-    public void getSessions(PluginCall call) {
+    public void getSessions(PluginCall call) throws JacksonException {
         List<Session> sessionList = FFmpegKitConfig.getSessions();
         List<Object> mappedList = new ArrayList<>();
         for (Session session : sessionList) {
@@ -116,41 +116,41 @@ public class FFmpegPlugin extends Plugin {
 
     }
 
+    private static class SessionData {
+        private long sessionId;
+        private Date endTime;
+        private String command;
+        private SessionState state;
+        private ReturnCode returnCode;
 
-}
-class SessionData {
-    private long sessionId;
-    private Date endTime;
-    private String command;
-    private SessionState state;
-    private ReturnCode returnCode;
+        public SessionData(long sessionId, Date endTime, String command, SessionState state, ReturnCode returnCode) {
+            this.sessionId = sessionId;
+            this.endTime = endTime;
+            this.command = command;
+            this.state = state;
+            this.returnCode = returnCode;
+        }
 
-    public SessionData(long sessionId, Date endTime, String command, SessionState state, ReturnCode returnCode) {
-        this.sessionId = sessionId;
-        this.endTime = endTime;
-        this.command = command;
-        this.state = state;
-        this.returnCode = returnCode;
+        // Getters for each property
+        public long getSessionId() {
+            return sessionId;
+        }
+
+        public Date getEndTime() {
+            return endTime;
+        }
+
+        public String getCommand() {
+            return command;
+        }
+
+        public SessionState getState() {
+            return state;
+        }
+
+        public ReturnCode getReturnCode() {
+            return returnCode;
+        }
     }
 
-    // Getters for each property
-    public long getSessionId() {
-        return sessionId;
-    }
-
-    public Date getEndTime() {
-        return endTime;
-    }
-
-    public String getCommand() {
-        return command;
-    }
-
-    public SessionState getState() {
-        return state;
-    }
-
-    public ReturnCode getReturnCode() {
-        return returnCode;
-    }
 }
